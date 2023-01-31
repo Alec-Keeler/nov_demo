@@ -2,8 +2,15 @@ const express = require('express');
 const app = express();
 const boardgamesRouter = require('./routes/boardgames')
 
+require('dotenv').config()
+
 app.use(express.json())  // this gives us req.body
 const data = require('./data')
+
+app.use((req, res, next) => {
+    console.log(process.env.SECRET_MESSAGE)
+    next()
+})
 
 
 // app.use(express.static('assets'))
@@ -33,7 +40,7 @@ app.use((err, req, res, next) => {
     })
 })
 
-const port = 8000
+const port = process.env.PORT
 app.listen(port, () => console.log(`Listening on port ${port}...`))
 
 module.exports = data
