@@ -40,13 +40,17 @@ app.get('/boardgames/search', (req, res, next) => {
         for (let i = 0; i < data.length; i++) {
             const game = data[i];
             if (game.name === req.query.name) {
-                res.json(data[i])
+                return res.json(data[i])
             }
         }
+        const err = new Error('The Game you were looking for is not here :(')
+        err.statusCode = 404
+        next(err)
     } else {
         res.json(data)
     }
 })
+
 
 // /boardgames/banana
 // /boardgames/1
@@ -71,7 +75,21 @@ app.get('/boardgames/:id', arr, (req, res) => {
     }
 })
 
+app.use((req, res, next) => {
+    const err = new Error('We could not find the requested page')
+    err.statusCode = 404
+    next(err)
+})
 
+app.use((err, req, res, next) => {
+    console.log(err)
+    let status = err.statusCode || 500
+    res.status(status)
+    res.json({
+        status: status,
+        message: err.message
+    })
+})
 
 const port = 8000
 app.listen(port, () => console.log(`Listening on port ${port}...`))
