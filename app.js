@@ -3,6 +3,10 @@ const app = express();
 
 app.use(express.json())  // this gives us req.body
 
+// app.use(express.static('assets'))
+// app.use(express.static('assets/css')) // /css/css/styling.css
+app.use('/banana', express.static('assets/css')) // /styling.css
+
 app.get('/test', (req, res) => {
     res.send('Your app is live') // res.json
 })
