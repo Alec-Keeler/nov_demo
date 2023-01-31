@@ -11,7 +11,8 @@
   },
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "apple": "nodemon app-leware.js"
   },
   "repository": {
     "type": "git",

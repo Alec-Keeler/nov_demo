@@ -30,7 +30,7 @@ app.get('/boardgames', (req, res) => {
 // Taking in user input
 // req.body, req.query, req.params
 
-app.get('/boardgames/search', (req, res) => {
+app.get('/boardgames/search', (req, res, next) => {
     console.log(req.query)
     if (req.query.name) {
         for (let i = 0; i < data.length; i++) {
@@ -47,7 +47,17 @@ app.get('/boardgames/search', (req, res) => {
 // /boardgames/banana
 // /boardgames/1
 // /boardgames/search
-app.get('/boardgames/:id', (req, res) => {
+
+
+const checkData = (req, res, next) => {
+    let index = req.params.id
+    if (data.length - 1 < index) {
+        return res.send('This game could not be found')
+    }
+    next()
+}
+let arr = [checkData]
+app.get('/boardgames/:id', arr, (req, res) => {
     console.log(req.params)
 
     if (data[req.params.id]) {
