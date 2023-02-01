@@ -2,10 +2,26 @@ const express = require('express')
 const router = express.Router()
 const data = require('../data')
 
+const DATA_SOURCE = 'bg_db.db';
+
+const sqlite3 = require('sqlite3');
+const db = new sqlite3.Database(DATA_SOURCE, sqlite3.OPEN_READWRITE);
+
 router.post('/', (request, response) => {
-    data.push(request.body)
-    response.status(201)
-    response.send('Thank you for adding a game to our list')
+    // data.push(request.body)
+    // response.status(201)
+    // response.send('Thank you for adding a game to our list')
+    const {name, avg_rating, max_players, genre} = request.body
+
+    const sql = 'INSERT INTO boardgames (name, avg_rating, max_players, genre) VALUES (?, ?, ?, ?);'
+    const params = [name, avg_rating, max_players, genre]
+    db.run(sql, params, (err) => {
+        if (err) {
+            response.send(err)
+        } else {
+            response.send('You built a board game')
+        }
+    })
 })
 
 router.get('/', (req, res) => {
@@ -51,14 +67,16 @@ const checkData = (req, res, next) => {
     next()
 }
 let arr = [checkData]
-router.get('/:id', arr, (req, res) => {
+router.get('/:id', (req, res) => {
     console.log(req.params)
 
-    if (data[req.params.id]) {
-        res.json(data[req.params.id])
-    } else {
-        res.send('This record does not exist D:')
-    }
+    // sql code, parameters, callback
+    const sql = 'SELECT * FROM boardgames WHERE id = ?;'
+    const params = [req.params.id]
+    db.get(sql, params, (err, row) => {
+        console.log(row)
+        res.json(row)
+    })
 })
 
 module.exports = router;
