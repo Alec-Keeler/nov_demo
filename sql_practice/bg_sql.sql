@@ -44,9 +44,22 @@
 -- SELECT * FROM boardgames
 -- ORDER BY name;
 
-SELECT * FROM boardgames
-ORDER BY name
-LIMIT 1
-OFFSET 1;
+-- SELECT * FROM boardgames
+-- ORDER BY name
+-- LIMIT 1
+-- OFFSET 1;
 -- LIMIT -1
 -- OFFSET 5;
+
+
+SELECT boardgames.name, boardgames.id, reviews.boardgame_id, reviews.comment FROM boardgames
+INNER JOIN reviews ON (boardgames.id = reviews.boardgame_id);
+WHERE boardgames.id = 6;
+
+
+SELECT boardgames.name, boardgames.id, genre_boardgames.game_id, genre_boardgames.genre_id, genres.id, genres.genre, reviews.comment
+FROM boardgames
+JOIN genre_boardgames ON (genre_boardgames.game_id = boardgames.id)
+JOIN genres ON (genre_boardgames.genre_id = genres.id)
+JOIN reviews ON (boardgames.id = reviews.boardgame_id)
+WHERE boardgames.id = 6;
