@@ -13,16 +13,17 @@
 
 INSERT INTO boardgames (name, max_players)
 VALUES
-('Gloomhaven', 4),
+('Gloomhaven', 3),
 ('Pandemic Legacy: Season 1', 4),
-('Brass: Birmingham', 4),
+('Brass: Birmingham', 6),
 ('Terraforming Mars', 5),
 ('Twilight Imperium: Fourth Edition', 6),
-('Spirit Island', 4),
-('Mage Knight', 4),
+('Spirit Island', 8),
+('Mage Knight', 7),
 ('Rising Sun', 5),
 ('Mystic Vale', 4),
-('Wingspan', 5);
+('Wingspan', 5),
+('Terra Mystica', 5);
 
 -- INSERT INTO boardgames (name, avg_rating, genre)
 -- VALUES
