@@ -30,12 +30,25 @@ VALUES
 
 INSERT INTO reviews (reviewer_name, comment, rating, boardgame_id)
 VALUES
-('Alec', 'This game is sweet', 10, 6);
+('Alec', 'This game is sweet', 10, 6),
+('Dan', '2gloomy4me', 5, 1),
+('Olivia', 'Even though it''s co-op, it''s pretty fun', 7, 6),
+('Nate', 'Animals are lame and so are animal board games', 1, 10);
 
 INSERT INTO genres (genre)
 VALUES
-('Strategy');
+('Strategy'),
+('Adventure'),
+('Economic'),
+('Coop');
 
 INSERT INTO genre_boardgames (game_id, genre_id)
 VALUES
-(5, 1);
+(5, 1),
+(5, 3),
+(1, 4),
+(1, 2),
+(2, 1),
+(2, 4),
+(4, 3),
+(6, 4);

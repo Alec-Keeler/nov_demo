@@ -20,8 +20,8 @@ CREATE TABLE reviews (
     comment TEXT NOT NULL,
     rating INTEGER,
     -- boardgame_id INTEGER,
-    -- FOREIGN KEY (boardgame_id) REFERENCES boardgames (id)
-    boardgame_id INTEGER REFERENCES boardgames (id)
+    -- FOREIGN KEY (boardgame_id) REFERENCES boardgames (id) ON DELETE CASCADE
+    boardgame_id INTEGER REFERENCES boardgames (id) ON DELETE SET NULL
 );
 
 CREATE TABLE genres (
@@ -31,6 +31,6 @@ CREATE TABLE genres (
 
 CREATE TABLE genre_boardgames (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    game_id INTEGER REFERENCES boardgames(id),
-    genre_id INTEGER REFERENCES genres(id)
+    game_id INTEGER REFERENCES boardgames(id) ON DELETE CASCADE,
+    genre_id INTEGER REFERENCES genres(id) ON DELETE CASCADE
 );
