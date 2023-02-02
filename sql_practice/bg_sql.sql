@@ -63,3 +63,8 @@ JOIN genre_boardgames ON (genre_boardgames.game_id = boardgames.id)
 JOIN genres ON (genre_boardgames.genre_id = genres.id)
 JOIN reviews ON (boardgames.id = reviews.boardgame_id)
 WHERE boardgames.id = 6;
+
+
+SELECT * FROM boardgames
+JOIN reviews ON (boardgames.id = reviews.boardgame_id)
+WHERE id = ?

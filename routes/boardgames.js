@@ -71,11 +71,12 @@ router.get('/:id', (req, res) => {
     console.log(req.params)
 
     // sql code, parameters, callback
-    const sql = 'SELECT * FROM boardgames WHERE id = ?;'
+    const sql = 'SELECT * FROM boardgames JOIN reviews ON (boardgames.id = reviews.boardgame_id) WHERE boardgames.id = ?;'
     const params = [req.params.id]
-    db.get(sql, params, (err, row) => {
-        console.log(row)
-        res.json(row)
+    db.all(sql, params, (err, rows) => {
+        console.log(err)
+        console.log(rows)
+        res.json(rows)
     })
 })
 
