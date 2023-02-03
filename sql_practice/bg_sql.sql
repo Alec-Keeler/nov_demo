@@ -72,3 +72,38 @@
 -- SELECT name FROM boardgames
 -- INNER JOIN reviews ON (boardgames.id = reviews.boardgame_id);
 -- WHERE rating > 6;
+
+-- SELECT MAX(rating), name FROM reviews
+-- JOIN boardgames ON (reviews.boardgame_id = boardgames.id);
+
+-- SELECT SUM(rating) FROM reviews
+-- WHERE boardgame_id = 2;
+
+-- SELECT AVG(rating), boardgame_id FROM reviews
+-- GROUP BY boardgame_id
+-- HAVING boardgame_id IN (5, 6);
+
+-- SELECT AVG(rating), boardgame_id FROM reviews
+-- WHERE boardgame_id IN (5, 6)
+-- GROUP BY boardgame_id
+-- HAVING boardgame_id IN (6);
+
+SELECT name FROM boardgames
+INNER JOIN reviews ON (boardgames.id = reviews.boardgame_id)
+WHERE rating > 6;
+
+SELECT boardgame_id FROM reviews
+WHERE rating > 6;
+
+SELECT name FROM boardgames
+WHERE id IN (
+    SELECT boardgame_id FROM reviews
+    WHERE rating > 6
+);
+
+INSERT INTO genre_boardgames (game_id, genre_id)
+VALUES
+-- (7, 4)
+(7, (
+    SELECT id FROM genres WHERE genre = 'Coop'
+));
