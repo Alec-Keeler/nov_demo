@@ -34,7 +34,9 @@ VALUES
 ('Alec', 'This game is sweet', 10, 6),
 ('Dan', '2gloomy4me', 5, 1),
 ('Olivia', 'Even though it''s co-op, it''s pretty fun', 7, 6),
-('Nate', 'Animals are lame and so are animal board games', 1, 10);
+('Nate', 'Animals are lame and so are animal board games', 1, 10),
+('David', 'Honestly, too soon.', null, 2),
+('Bill', 'I can be a space pirate, enough said', 9, 5);
 
 INSERT INTO genres (genre)
 VALUES
