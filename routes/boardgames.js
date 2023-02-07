@@ -2,6 +2,42 @@ const express = require('express')
 const router = express.Router()
 const data = require('../data')
 
+const {Boardgame} = require('../db/models')
+
+router.get('/test', async (req, res) => {
+    let game = Boardgame.build({
+        name: 'Monopoly',
+        maxPlayers: 4
+    })
+    // INSERT INTO Boardgames (name, maxPlayers) VALUES ('Monopolyyyyy', 4);
+    game.validate()
+
+    await game.save()
+
+    res.json(game)
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const DATA_SOURCE = 'bg_db.db';
 
 const sqlite3 = require('sqlite3');

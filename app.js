@@ -1,16 +1,16 @@
+require('dotenv').config()  
 const express = require('express');
 const app = express();
 const boardgamesRouter = require('./routes/boardgames')
 
-require('dotenv').config()
 
 app.use(express.json())  // this gives us req.body
 const data = require('./data')
 
-app.use((req, res, next) => {
-    console.log(process.env.SECRET_MESSAGE)
-    next()
-})
+// app.use((req, res, next) => {
+    // console.log(process.env.SECRET_MESSAGE)
+//     next()
+// })
 
 
 // app.use(express.static('assets'))
