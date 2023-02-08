@@ -56,21 +56,49 @@ const DATA_SOURCE = 'bg_db.db';
 const sqlite3 = require('sqlite3');
 const db = new sqlite3.Database(DATA_SOURCE, sqlite3.OPEN_READWRITE);
 
-router.post('/', (request, response) => {
-    // data.push(request.body)
-    // response.status(201)
-    // response.send('Thank you for adding a game to our list')
-    const {name, avg_rating, max_players, genre} = request.body
+router.post('/', async(req, res) => {
 
-    const sql = 'INSERT INTO boardgames (name, avg_rating, max_players, genre) VALUES (?, ?, ?, ?);'
-    const params = [name, avg_rating, max_players, genre]
-    db.run(sql, params, (err) => {
-        if (err) {
-            response.send(err)
-        } else {
-            response.send('You built a board game')
-        }
+    const {gameName, maxPlayers} = req.body
+
+    if (!gameName || !maxPlayers) {
+        res.send('please provide valid gameName and maxPlayers')
+    }
+
+    // create
+    // build + save
+
+    // const newGame = await Boardgame.create({
+    //     // gameName: gameName
+    //     gameName,
+    //     maxPlayers
+    // })
+
+    const newGame = Boardgame.build({
+        gameName,
+        maxPlayers
     })
+    await newGame.save()
+
+    res.json(newGame)
+
+
+
+
+
+
+
+
+    // const {name, avg_rating, max_players, genre} = request.body
+
+    // const sql = 'INSERT INTO boardgames (name, avg_rating, max_players, genre) VALUES (?, ?, ?, ?);'
+    // const params = [name, avg_rating, max_players, genre]
+    // db.run(sql, params, (err) => {
+    //     if (err) {
+    //         response.send(err)
+    //     } else {
+    //         response.send('You built a board game')
+    //     }
+    // })
 })
 
 router.get('/', (req, res) => {

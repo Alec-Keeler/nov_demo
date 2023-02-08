@@ -20,11 +20,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       validate: {
         len: [1, 50],
-        isAGameILike(value) { // Can refer to other properties using this.otherPropertyName
-          if (value.charAt(0) !== 'D') {
-            throw new Error('Only games I like can be added to the DB')
-          }
-        }
+        // isAGameILike(value) { // Can refer to other properties using this.otherPropertyName
+        //   if (value.charAt(0) !== 'D') {
+        //     throw new Error('Only games I like can be added to the DB')
+        //   }
+        // }
       }
     },
     maxPlayers: {
