@@ -2,21 +2,24 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Boardgames', {
+    await queryInterface.createTable('GenreBoardgames', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      gameName: {
-        allowNull: false, //NOT NULL
-        type: Sequelize.STRING(50),
-        // unique: true // UNIQUE
+      boardgameId: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'Boardgames'
+        }
       },
-      maxPlayers: {
-        allowNull: false,
-        type: Sequelize.INTEGER
+      genreId: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'Genres'
+        }
       },
       createdAt: {
         allowNull: false,
@@ -31,12 +34,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Boardgames');
+    await queryInterface.dropTable('GenreBoardgames');
   }
 };
-
-// CREATE TABLE Boardgames (
-//   id,
-//   name VARCHAR NOT NULL UNIQUE,
-//   maxPlayers
-// )

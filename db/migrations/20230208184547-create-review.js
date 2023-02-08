@@ -2,19 +2,30 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Boardgames', {
+    await queryInterface.createTable('Reviews', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      gameName: {
-        allowNull: false, //NOT NULL
-        type: Sequelize.STRING(50),
-        // unique: true // UNIQUE
+      reviewer: {
+        allowNull: false,
+        type: Sequelize.STRING
       },
-      maxPlayers: {
+      comment: {
+        allowNull: false,
+        type: Sequelize.TEXT
+      },
+      gameId: {
+        allowNull: false,
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'Boardgames', //TABLE NAME!!!
+          // key: 'id' // gameId INTEGER REFERENCES boardgames(id)
+        }
+      },
+      rating: {
         allowNull: false,
         type: Sequelize.INTEGER
       },
@@ -31,12 +42,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Boardgames');
+    await queryInterface.dropTable('Reviews');
   }
 };
-
-// CREATE TABLE Boardgames (
-//   id,
-//   name VARCHAR NOT NULL UNIQUE,
-//   maxPlayers
-// )

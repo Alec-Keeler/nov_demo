@@ -11,6 +11,14 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Boardgame.hasMany(models.Review, { foreignKey: 'gameId'})
+      // FROM Boardgames JOIN Reviews ON (reviews.gameId = boardgames.id)
+
+      Boardgame.belongsToMany(models.Genre, {
+        through: models.GenreBoardgame, // 'GenreBoardgames'
+        foreignKey: 'boardgameId', // FROM Boardgames JOIN GenreBoardgames ON (boardgames.id = genreboardgames.boardgameId)
+        otherKey: 'genreId' // JOIN Genres ON (genres.id = genreboardgames.genreId)
+      })
     }
   }
   Boardgame.init({
