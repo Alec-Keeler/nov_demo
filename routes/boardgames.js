@@ -83,11 +83,6 @@ router.post('/', async(req, res) => {
 
 
 
-
-
-
-
-
     // const {name, avg_rating, max_players, genre} = request.body
 
     // const sql = 'INSERT INTO boardgames (name, avg_rating, max_players, genre) VALUES (?, ?, ?, ?);'
@@ -99,6 +94,32 @@ router.post('/', async(req, res) => {
     //         response.send('You built a board game')
     //     }
     // })
+})
+
+router.put('/:id', async(req, res) => {
+    // Boardgame.update({gameName: 'new value}, {id: req.params.id})
+    // query for record to update
+        // assigned property values, then invoke save()
+        // invoke set() on instance, provide k/v of new data, game.set({gameName: 'new value}), await instance.save()
+        // invoke .update on instance to immediately save the update to the DB without .save
+    const {gameName} = req.body
+    const game = await Boardgame.findByPk(req.params.id)
+
+    // game.gameName = gameName
+    // await game.save()
+    // game.set({gameName: gameName})
+    // await game.save()
+    await game.update({gameName: gameName})
+    res.json({updatedGame: game})
+})
+
+router.delete('/:id', async(req, res) => {
+    // Boardgame.destroy({where: {}})
+
+    const game = await Boardgame.findByPk(req.params.id)
+
+    await game.destroy()
+    res.json({message: "Your game was destroyed!"})
 })
 
 router.get('/', (req, res) => {
