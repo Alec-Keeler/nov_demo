@@ -4,26 +4,39 @@ const data = require('../data')
 
 const {Boardgame} = require('../db/models')
 
-router.get('/test', async (req, res) => {
-    let game = Boardgame.build({
-        name: 'Monopoly',
-        maxPlayers: 4
+// router.get('/test', async (req, res) => {
+//     let game = Boardgame.build({
+//         name: 'Monopoly',
+//         maxPlayers: 4
+//     })
+//     // INSERT INTO Boardgames (name, maxPlayers) VALUES ('Monopolyyyyy', 4);
+//     game.validate()
+
+//     await game.save()
+
+//     res.json(game)
+// })
+
+
+
+
+const { Op } = require("sequelize");
+
+
+// /boardgames
+router.get('/', async(req, res) => {
+    const games = await Boardgame.findAll({
+        where: {
+            gameName: {
+                [Op.like]: 'T%'
+            },
+            // maxPlayers: 6
+        },
+        order: [['maxPlayers', 'DESC'], ['gameName', 'DESC']]
+        // order: ['maxPlayers']
     })
-    // INSERT INTO Boardgames (name, maxPlayers) VALUES ('Monopolyyyyy', 4);
-    game.validate()
-
-    await game.save()
-
-    res.json(game)
+    res.json({games})
 })
-
-
-
-
-
-
-
-
 
 
 
@@ -71,21 +84,30 @@ router.get('/', (req, res) => {
 
 // Taking in user input
 // req.body, req.query, req.params
-
-router.get('/search', (req, res, next) => {
+// /boardgames/search?name=Spirit Island
+router.get('/search', async(req, res, next) => {
     console.log(req.query)
     if (req.query.name) {
-        for (let i = 0; i < data.length; i++) {
-            const game = data[i];
-            if (game.name === req.query.name) {
-                return res.json(data[i])
-            }
+        // findByPk, findOne, findAll
+        // .findByPk(req.params.id, {})
+        // .findOne({})  // ONLY returns one record
+        // .findAll({})  // Always returns an array
+        try {
+            let game = await Boardgame.findOne({
+                where: {
+                    // gameName: req.query.name
+                    maxPlayers: 5
+                }
+            })
+            res.json({
+                // game: game
+                game
+            })
+        } catch (err) {
+            console.log(err)
         }
-        const err = new Error('The Game you were looking for is not here :(')
-        err.statusCode = 404
-        next(err)
     } else {
-        res.json(data)
+        res.send('please include a name query parameter')
     }
 })
 
@@ -95,25 +117,29 @@ router.get('/search', (req, res, next) => {
 // /boardgames/1
 // /boardgames/search
 
-const checkData = (req, res, next) => {
-    let index = req.params.id
-    if (data.length - 1 < index) {
-        return res.send('This game could not be found')
-    }
-    next()
-}
-let arr = [checkData]
-router.get('/:id', (req, res) => {
+// const checkData = (req, res, next) => {
+//     let index = req.params.id
+//     if (data.length - 1 < index) {
+//         return res.send('This game could not be found')
+//     }
+//     next()
+// }
+// let arr = [checkData]
+router.get('/:id', async(req, res) => {
     console.log(req.params)
 
+    const game = await Boardgame.findByPk(req.params.id)
+    res.json(game)
+
+
     // sql code, parameters, callback
-    const sql = 'SELECT * FROM boardgames JOIN reviews ON (boardgames.id = reviews.boardgame_id) WHERE boardgames.id = ?;'
-    const params = [req.params.id]
-    db.all(sql, params, (err, rows) => {
-        console.log(err)
-        console.log(rows)
-        res.json(rows)
-    })
+    // const sql = 'SELECT * FROM boardgames JOIN reviews ON (boardgames.id = reviews.boardgame_id) WHERE boardgames.id = ?;'
+    // const params = [req.params.id]
+    // db.all(sql, params, (err, rows) => {
+    //     console.log(err)
+    //     console.log(rows)
+    //     res.json(rows)
+    // })
 })
 
 module.exports = router;

@@ -35,10 +35,10 @@ module.exports = (sequelize, DataTypes) => {
         min: 1
       }
     },
-    genre: {
-      allowNull: false,
-      type: DataTypes.STRING
-    }
+    // genre: {
+    //   allowNull: false,
+    //   type: DataTypes.STRING
+    // }
   }, {
     sequelize,
     modelName: 'Boardgame',
