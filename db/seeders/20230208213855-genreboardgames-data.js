@@ -12,6 +12,14 @@ module.exports = {
      *   isBetaMember: false
      * }], {});
     */
+    let data = [
+      {gameName: 'Spirit Island', genre: 'Strategy'},
+      { gameName: 'Pandemic Legacy: Season 1', genre: 'Cooperative'},
+      { gameName: 'Brass: Birmingham', genre: 'Economic'},
+      { gameName: 'Terraforming Mars', genre: 'Economic'},
+      { gameName: 'Terraforming Mars', genre: 'Strategy'},
+      {gameName: 'Spirit Island', genre: 'Cooperative'},
+    ]
    await queryInterface.bulkInsert('GenreBoardgames', [
     {boardgameId: 6, genreId: 1},
     {boardgameId: 2, genreId: 2},

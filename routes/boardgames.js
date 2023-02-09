@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 // const data = require('../data')
 
-const {Boardgame, Review, Genre} = require('../db/models')
+const {Boardgame, Review, Genre, sequelize} = require('../db/models')
 
 router.get('/test', async (req, res) => {
     let game = Boardgame.build({
@@ -17,6 +17,50 @@ router.get('/test', async (req, res) => {
     res.json(game)
 })
 
+// For testing adder methods
+router.get('/add/:id', async(req, res) => {
+    // Create a new review based on a board game instance
+    const game = await Boardgame.findByPk(req.params.id)
+    // // req.body
+    // const review = await game.createReview(req.body)
+    // res.json({review})
+
+    // Build a relationship between a board game and any number of genres
+    await game.addGenre(req.body.genreIds)
+    res.send('added genres')
+})
+
+
+// For testing aggregates
+router.get('/agg', async(req, res) => {
+// agg methods on models/class methods
+    // count, sum, max, min
+    const numGames = await Boardgame.count()
+
+    const lowestReview = await Review.min('rating')
+
+    // SELECT AVG(rating) FROM Reviews
+    const reviews = await Review.findAll({
+        // attributes: [
+        //     'comment',
+        //     'rating',
+        //     [sequelize.fn('AVG', sequelize.col('rating')), 'avgRating']
+        // ],
+        attributes: {
+            include: [[sequelize.fn('AVG', sequelize.col('rating')), 'avgRating']]
+        }
+        // include: {
+        //     model: Boardgame,
+        //     attributes: ['gameName']
+        // }
+    })
+
+    res.json({
+        reviews,
+        lowestRating: lowestReview,
+        numGames: numGames
+    })
+})
 
 
 

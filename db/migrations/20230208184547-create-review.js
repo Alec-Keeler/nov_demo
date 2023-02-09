@@ -23,7 +23,8 @@ module.exports = {
         references: {
           model: 'Boardgames', //TABLE NAME!!!
           // key: 'id' // gameId INTEGER REFERENCES boardgames(id)
-        }
+        },
+        onDelete: 'CASCADE'
       },
       rating: {
         allowNull: false,

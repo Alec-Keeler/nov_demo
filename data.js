@@ -24,13 +24,3 @@ let reviewData = [{reviewer: 'Alec', comment: 'This game is sweet', rating: 10, 
 {reviewer: 'Nate', comment: 'Animals are lame and so are animal board games', rating: 1, gameName: 'Wingspan'},
 { reviewer: 'David', comment: 'Honestly, too soon.', rating: null, gameName: 'Pandemic Legacy: Season 1' },
 { reviewer: 'Franco', comment: 'I can be a space pirate, enough said', rating: 9, gameName: 'Twilight Imperium: Fourth Edition' }]
-
-// for (let i = 0; i < reviewData.length; i++) {
-//     const record = reviewData[i];
-//     let associatedGame = await Boardgame.findOne({ where: { gameName: record.gameName }})
-//     await associatedGame.createReview({
-//         reviewer: record.reviewer,
-//         comment: record.comment,
-//         rating: record.rating
-//     })
-// }
