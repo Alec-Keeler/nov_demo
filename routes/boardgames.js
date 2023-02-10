@@ -1,280 +1,218 @@
 const express = require('express')
 const router = express.Router()
-// const data = require('../data')
 
-const {Boardgame, Review, Genre, sequelize} = require('../db/models')
+const { Boardgame, Review, Genre, sequelize } = require('../db/models')
+const { Op } = require("sequelize");
 
-router.get('/test', async (req, res) => {
-    let game = Boardgame.build({
-        name: 'Monopoly',
-        maxPlayers: 4
+// Find all board games
+// Order by gameName
+// Include review rating average
+// Include board game genres
+router.get('/', async(req, res) => {
+    const games = await Boardgame.findAll({
+        include: {
+            model: Genre,
+            attributes: ['genre'],
+            through: {
+                attributes: []
+            }
+        },
+        order: [['gameName'], [Genre, 'genre']]
     })
-    // INSERT INTO Boardgames (name, maxPlayers) VALUES ('Monopolyyyyy', 4);
-    game.validate()
 
-    await game.save()
+    let payload = []
+    for (let i = 0; i < games.length; i++) {
+        const game = games[i];
+        let gameJson = game.toJSON()
+        const gameRating = await Review.findOne({
+            where: {
+                gameId: game.id
+            },
+            attributes: [
+                [sequelize.fn('AVG', sequelize.col('rating')), 'avgRating']
+            ]
+        })
+        let rating = gameRating.dataValues.avgRating
+        if (!rating) {
+            gameJson.avgRating = 'No reviews yet'
+        } else {
+            gameJson.avgRating = rating
+        }
+        // console.log(gameJson)
+        payload.push(gameJson)
+    }
 
+    res.json({Games: payload})
+})
+
+router.get('/:id(\\d+)', async(req, res, next) => {
+    const game = await Boardgame.findByPk(req.params.id, {
+        include: {
+            model: Review
+        },
+        order: [[Review, 'rating', 'DESC']]
+    })
+    if (!game) {
+        const err = new Error(`Game with an id of ${req.params.id} does not exist :(`)
+        err.statusCode = 404
+        return next(err)
+    }
     res.json(game)
 })
 
-// For testing adder methods
-router.get('/add/:id', async(req, res) => {
-    // Create a new review based on a board game instance
-    const game = await Boardgame.findByPk(req.params.id)
-    // // req.body
-    // const review = await game.createReview(req.body)
-    // res.json({review})
+// Create new Boardgame
+// Also add Genre join table records
+    // body:
+    // gameName, maxPlayers, genreStrings array
 
-    // Build a relationship between a board game and any number of genres
-    await game.addGenre(req.body.genreIds)
-    res.send('added genres')
-})
+const gameCheck = (req, res, next) => {
+    let errors = []
+    if (!req.body.gameName) {
+        errors.push('Game Name is required')
+    }
+    if (!req.body.maxPlayers) {
+        errors.push('Max Player count is required')
+    }
+    if (errors.length > 0) {
+        const err = new Error('Invalid user input')
+        err.statusCode = 400
+        err.errors = errors
+        return next(err)
+    }
+    next()
+}
 
+router.post('/', gameCheck, async(req, res) => {
+    const {gameName, maxPlayers, genreNames} = req.body
 
-// For testing aggregates
-router.get('/agg', async(req, res) => {
-// agg methods on models/class methods
-    // count, sum, max, min
-    const numGames = await Boardgame.count()
+    const newGame = await Boardgame.create({
+        gameName,
+        maxPlayers
+    })
 
-    const lowestReview = await Review.min('rating')
-
-    // SELECT AVG(rating) FROM Reviews
-    const reviews = await Review.findAll({
-        // attributes: [
-        //     'comment',
-        //     'rating',
-        //     [sequelize.fn('AVG', sequelize.col('rating')), 'avgRating']
-        // ],
-        attributes: {
-            include: [[sequelize.fn('AVG', sequelize.col('rating')), 'avgRating']]
+    const genreList = await Genre.findAll({
+        where: {
+            genre: genreNames
         }
-        // include: {
-        //     model: Boardgame,
-        //     attributes: ['gameName']
-        // }
+    })
+    let genreIds = []
+    for (let i = 0; i < genreList.length; i++) {
+        const genre = genreList[i].toJSON();
+        genreIds.push(genre.id)
+    }
+    
+    await newGame.addGenres(genreIds)
+    let gameId = newGame.toJSON().id
+    const createdGame = await Boardgame.findByPk(gameId, {
+        include: {
+            model: Genre,
+            attributes: ['genre'],
+            through: {
+                attributes: []
+            }
+        }
     })
 
     res.json({
-        reviews,
-        lowestRating: lowestReview,
-        numGames: numGames
+        message: "Game successfully added to the database :)",
+        game: createdGame
     })
 })
 
+const checkUpdateInput = (req, res, next) => {
+    let errors = []
+    if (!req.body.gameName && !req.body.maxPlayers) {
+        errors.push('To update a game, please provide a new game name or max players value')
+    }
+    if (req.body.maxPlayers > 10 || req.body.maxPlayers < 1) {
+        errors.push('Please provide a max players value between 1 and 10')
+    }
+    if (errors.length > 0) {
+        const err = new Error('Something went wrong')
+        err.statusCode = 400
+        err.errors = errors
+        return next(err)
+    }
+    next()
+}
 
+// gameName and/or maxPlayers
+router.put('/:id', checkUpdateInput, async(req, res, next) => {
+    const {gameName, maxPlayers} = req.body
+    const gameToUpdate = await Boardgame.findByPk(req.params.id)
 
-const { Op } = require("sequelize");
+    if (!gameToUpdate) {
+        const err = new Error(`Game with an id of ${req.params.id} does not exist :(`)
+        err.statusCode = 404
+        return next(err)
+    }
 
+    if (gameName) {
+        gameToUpdate.set({
+            gameName
+        })
+    }
+    if (maxPlayers) {
+        gameToUpdate.set({
+            maxPlayers
+        })
+    }
+    await gameToUpdate.save()
 
-// // /boardgames
-router.get('/', async(req, res) => {
-    const games = await Boardgame.findAll({
-        where: {
-            gameName: {
-                [Op.like]: 'T%'
-            },
-            // maxPlayers: 6
-        },
-        order: [['maxPlayers', 'DESC'], ['gameName', 'DESC']]
-        // order: ['maxPlayers']
+    res.json({
+        message: `Successfully updated game with an id of ${req.params.id}`,
+        game: gameToUpdate
     })
-    res.json({games})
 })
 
+router.delete('/:id', async(req, res, next) => {
+    const game = await Boardgame.findByPk(req.params.id)
 
+    if (!game) {
+        const err = new Error(`Game with an id of ${req.params.id} does not exist :(`)
+        err.statusCode = 404
+        return next(err)
+    }
 
+    try {
+        
+        await game.destroy()
+    } catch (error) {
+        console.log(error)
+    }
+    res.json({
+        message: `The board game with an id of ${req.params.id} has been deleted`
+    })
+})
 
-router.get('/join', async(req, res) => {
-    // const game = await Boardgame.findOne({
-    //     where: {id: 6}
-    // })
-
-    // const reviews = await game.getReviews()
-
-    // const review = await Review.findOne({
-    //     where: {id: 1}
-    // })
-    // let game = await review.getBoardgame()
-    // res.json({game, review})
-
-    // const game = await Boardgame.findOne({
-    //     where: {id: 6},
-    //     // include: Review
-    //     // include: {
-    //     //     model: Review
-    //     // }
-    //     // include: [Review]
-    //     include: [{model: Review}, {model: Genre}]
-    // })
-
-    // get review, get associated boardgame, get associated genres
-    const review = await Review.findOne({
-        where: {id: 1},
-        // include: [Boardgame, Genre] //BAD D:
-        include: {
-            model: Boardgame,
-            include: {model: Genre}
+// req.query.gameName, req.query.minPlayers/maxPlayers
+router.get('/search', async(req, res) => {
+    let query = {
+        where: {}
+    }
+    const {gameName, minPlayers, maxPlayers} = req.query
+    if (gameName) {
+        query.where.gameName = {
+            [Op.substring]: gameName
         }
-    })
-
-    res.json(review)
+    }
+    if (minPlayers && maxPlayers) {
+        query.where.maxPlayers = {
+            [Op.gte]: minPlayers,
+            [Op.lte]: maxPlayers
+        }
+    } else if (minPlayers) {
+        query.where.maxPlayers = {
+            [Op.gte]: minPlayers
+        }
+    } else if (maxPlayers) {
+        query.where.maxPlayers = {
+            [Op.lte]: maxPlayers
+        }
+    }
+    query.order = [['gameName']]
+    const games = await Boardgame.findAll(query)
+    res.json(games)
 })
-
-
-router.get('/assoc-test', async(req, res) => {
-    const genre = await Genre.findOne({
-        where: {id: 1},
-        include: Boardgame
-    })
-    res.json(genre)
-})
-
-
-
-
-
-
-
-
-// const DATA_SOURCE = 'bg_db.db';
-
-// const sqlite3 = require('sqlite3');
-// const db = new sqlite3.Database(DATA_SOURCE, sqlite3.OPEN_READWRITE);
-
-// router.post('/', async(req, res) => {
-
-//     const {gameName, maxPlayers} = req.body
-
-//     if (!gameName || !maxPlayers) {
-//         res.send('please provide valid gameName and maxPlayers')
-//     }
-
-//     // create
-//     // build + save
-
-//     // const newGame = await Boardgame.create({
-//     //     // gameName: gameName
-//     //     gameName,
-//     //     maxPlayers
-//     // })
-
-//     const newGame = Boardgame.build({
-//         gameName,
-//         maxPlayers
-//     })
-//     await newGame.save()
-
-//     res.json(newGame)
-
-
-
-//     // const {name, avg_rating, max_players, genre} = request.body
-
-//     // const sql = 'INSERT INTO boardgames (name, avg_rating, max_players, genre) VALUES (?, ?, ?, ?);'
-//     // const params = [name, avg_rating, max_players, genre]
-//     // db.run(sql, params, (err) => {
-//     //     if (err) {
-//     //         response.send(err)
-//     //     } else {
-//     //         response.send('You built a board game')
-//     //     }
-//     // })
-// })
-
-// router.put('/:id', async(req, res) => {
-//     // Boardgame.update({gameName: 'new value}, {id: req.params.id})
-//     // query for record to update
-//         // assigned property values, then invoke save()
-//         // invoke set() on instance, provide k/v of new data, game.set({gameName: 'new value}), await instance.save()
-//         // invoke .update on instance to immediately save the update to the DB without .save
-//     const {gameName} = req.body
-//     const game = await Boardgame.findByPk(req.params.id)
-
-//     // game.gameName = gameName
-//     // await game.save()
-//     // game.set({gameName: gameName})
-//     // await game.save()
-//     await game.update({gameName: gameName})
-//     res.json({updatedGame: game})
-// })
-
-// router.delete('/:id', async(req, res) => {
-//     // Boardgame.destroy({where: {}})
-
-//     const game = await Boardgame.findByPk(req.params.id)
-
-//     await game.destroy()
-//     res.json({message: "Your game was destroyed!"})
-// })
-
-// router.get('/', (req, res) => {
-//     res.json({
-//         ourBoardgames: data
-//     })
-// })
-
-// //put, patch, delete
-// //send, json, redirect, render
-
-// // Taking in user input
-// // req.body, req.query, req.params
-// // /boardgames/search?name=Spirit Island
-// router.get('/search', async(req, res, next) => {
-//     console.log(req.query)
-//     if (req.query.name) {
-//         // findByPk, findOne, findAll
-//         // .findByPk(req.params.id, {})
-//         // .findOne({})  // ONLY returns one record
-//         // .findAll({})  // Always returns an array
-//         try {
-//             let game = await Boardgame.findOne({
-//                 where: {
-//                     // gameName: req.query.name
-//                     maxPlayers: 5
-//                 }
-//             })
-//             res.json({
-//                 // game: game
-//                 game
-//             })
-//         } catch (err) {
-//             console.log(err)
-//         }
-//     } else {
-//         res.send('please include a name query parameter')
-//     }
-// })
-
-
-
-// // /boardgames/banana
-// // /boardgames/1
-// // /boardgames/search
-
-// // const checkData = (req, res, next) => {
-// //     let index = req.params.id
-// //     if (data.length - 1 < index) {
-// //         return res.send('This game could not be found')
-// //     }
-// //     next()
-// // }
-// // let arr = [checkData]
-// router.get('/:id', async(req, res) => {
-//     console.log(req.params)
-
-//     const game = await Boardgame.findByPk(req.params.id)
-//     res.json(game)
-
-
-//     // sql code, parameters, callback
-//     // const sql = 'SELECT * FROM boardgames JOIN reviews ON (boardgames.id = reviews.boardgame_id) WHERE boardgames.id = ?;'
-//     // const params = [req.params.id]
-//     // db.all(sql, params, (err, rows) => {
-//     //     console.log(err)
-//     //     console.log(rows)
-//     //     res.json(rows)
-//     // })
-// })
 
 module.exports = router;

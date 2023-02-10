@@ -19,6 +19,8 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'boardgameId', // FROM Boardgames JOIN GenreBoardgames ON (boardgames.id = genreboardgames.boardgameId)
         otherKey: 'genreId' // JOIN Genres ON (genres.id = genreboardgames.genreId)
       })
+
+      Boardgame.hasMany(models.GenreBoardgame, {foreignKey: 'boardgameId', onDelete: 'CASCADE', hooks: true})
     }
   }
   Boardgame.init({

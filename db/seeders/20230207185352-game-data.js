@@ -17,7 +17,7 @@ module.exports = {
      {gameName: 'Pandemic Legacy: Season 1', maxPlayers: 4},
      {gameName: 'Brass: Birmingham', maxPlayers: 6},
      {gameName: 'Terraforming Mars', maxPlayers: 5},
-     { gameName: 'Twilight Imperium: Fourth Edition', maxPlayers: 6},
+     {gameName: 'Twilight Imperium: Fourth Edition', maxPlayers: 6},
      {gameName: 'Spirit Island', maxPlayers: 8},
      {gameName: 'Mage Knight', maxPlayers: 7},
      {gameName: 'Rising Sun', maxPlayers: 5},

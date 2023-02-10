@@ -13,13 +13,15 @@ module.exports = {
         type: Sequelize.INTEGER,
         references: {
           model: 'Boardgames'
-        }
+        },
+        onDelete: 'CASCADE'
       },
       genreId: {
         type: Sequelize.INTEGER,
         references: {
           model: 'Genres'
-        }
+        },
+        onDelete: 'CASCADE'
       },
       createdAt: {
         allowNull: false,

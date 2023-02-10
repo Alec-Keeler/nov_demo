@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       Genre.belongsToMany(models.Boardgame, {
         through: models.GenreBoardgame,
-        foreignkey: 'genreId',
+        foreignKey: 'genreId',
         otherKey: 'boardgameId'
       })
     }
