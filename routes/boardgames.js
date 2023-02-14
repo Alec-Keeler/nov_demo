@@ -185,34 +185,30 @@ router.delete('/:id', async(req, res, next) => {
     })
 })
 
-// req.query.gameName, req.query.minPlayers/maxPlayers
+// Pagination: req.query.page, req.query.size
+// Search Params: req.query.gameName, req.query.minPlayers, req.query.genre
 router.get('/search', async(req, res) => {
-    let query = {
-        where: {}
+    // extract page/size 
+    let {page, size} = req.query
+    let pagination = {}
+
+    // set default values if none are provided
+    if (!page) page = 1
+    if (!size) size = 3
+
+    // check if values given are greater than 0
+    // if values are 0 or less, query for ALL games
+    if (parseInt(page) >= 1 && parseInt(size) >= 1) {
+        pagination.limit = size
+        // calculate offset value
+        pagination.offset = size * (page - 1)
     }
-    const {gameName, minPlayers, maxPlayers} = req.query
-    if (gameName) {
-        query.where.gameName = {
-            [Op.substring]: gameName
-        }
-    }
-    if (minPlayers && maxPlayers) {
-        query.where.maxPlayers = {
-            [Op.gte]: minPlayers,
-            [Op.lte]: maxPlayers
-        }
-    } else if (minPlayers) {
-        query.where.maxPlayers = {
-            [Op.gte]: minPlayers
-        }
-    } else if (maxPlayers) {
-        query.where.maxPlayers = {
-            [Op.lte]: maxPlayers
-        }
-    }
-    query.order = [['gameName']]
-    const games = await Boardgame.findAll(query)
-    res.json(games)
+
+
+    const games = await Boardgame.findAll({
+        ...pagination
+    })
+    res.json({games})
 })
 
 module.exports = router;
