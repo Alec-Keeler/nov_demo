@@ -185,12 +185,33 @@ router.delete('/:id', async(req, res, next) => {
     })
 })
 
+const getPagination = (queryParams) => {
+    let { page, size } = queryParams;
+    if (!page) page = 1;
+    if (!size) size = 5;
+    const pagination = {};
+    if (page >= 1 && size >= 1) {
+        pagination.limit = size;
+        pagination.offset = size * (page - 1);
+    }
+    return pagination
+}
+
 // Pagination: req.query.page, req.query.size
 // Search Params: req.query.gameName, req.query.minPlayers, req.query.genre
+    // Check for each param individually
+    // Conditionally add each param to query
+        // Will need to pre-define query object to conditionally build onto
+    // Refactor pagination to add its properties to query object
 router.get('/search', async(req, res) => {
+    let query = {
+        where: {},
+        include: []
+    }
+
     // extract page/size 
     let {page, size} = req.query
-    let pagination = {}
+    // let pagination = {}
 
     // set default values if none are provided
     if (!page) page = 1
@@ -199,15 +220,33 @@ router.get('/search', async(req, res) => {
     // check if values given are greater than 0
     // if values are 0 or less, query for ALL games
     if (parseInt(page) >= 1 && parseInt(size) >= 1) {
-        pagination.limit = size
+        query.limit = size
         // calculate offset value
-        pagination.offset = size * (page - 1)
+        query.offset = size * (page - 1)
+    }
+
+    if (req.query.gameName) {
+        query.where.gameName = req.query.gameName
+    }
+
+    if (req.query.minPlayers) {
+        query.where.maxPlayers = {
+            [Op.gte]: req.query.minPlayers
+        }
+    }
+
+    if (req.query.genre) {
+        let includeObj = {
+            model: Genre,
+            where: {
+                genre: req.query.genre
+            }
+        }
+        query.include.push(includeObj)
     }
 
 
-    const games = await Boardgame.findAll({
-        ...pagination
-    })
+    const games = await Boardgame.findAll(query)
     res.json({games})
 })
 
