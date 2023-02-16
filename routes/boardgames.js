@@ -8,6 +8,14 @@ const { Op } = require("sequelize");
 // Order by gameName
 // Include review rating average
 // Include board game genres
+router.get('/scopes', async(req, res) => {
+    const result = await Boardgame.scope(['defaultScope', {
+        method: ['getReviews', 5]
+    }]).findAll()
+
+    res.send(result)
+})
+
 router.get('/', async(req, res) => {
     const games = await Boardgame.findAll({
         include: {

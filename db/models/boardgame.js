@@ -1,4 +1,5 @@
 'use strict';
+const { Op } = require("sequelize");
 const {
   Model
 } = require('sequelize');
@@ -52,6 +53,37 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'Boardgame',
+    defaultScope: {
+      // attributes: ['gameName', 'maxPlayers']
+      attributes: {
+        exclude: ['createdAt', 'updatedAt']
+      }
+    },
+    scopes: {
+      bigGames: {
+        where: {
+          maxPlayers: {
+            [Op.gte]: 6
+          }
+        }
+      },
+      getReviews(rating) {
+        const {Review} = require('../models')
+        return {
+          include: {
+            model: Review,
+            where: {
+              rating: {
+                [Op.gte]: rating
+              }
+            },
+            attributes: {
+              exclude: ['createdAt', 'updatedAt']
+            }
+          }
+        }
+      }
+    }
   });
   return Boardgame;
 }; 
